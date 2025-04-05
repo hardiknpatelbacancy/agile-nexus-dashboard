@@ -9,6 +9,7 @@ import StatCard from "@/components/dashboard/StatCard";
 import StatusCard from "@/components/dashboard/StatusCard";
 import ProjectCard from "@/components/projects/ProjectCard";
 import RevenueChart from "@/components/finance/RevenueChart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 // Mock data for the dashboard
 const projectStats = [
@@ -61,6 +62,16 @@ const recentProjects = [
 ];
 
 const Dashboard = () => {
+  const projectStatusConfig = {
+    projectStatus: {
+      label: "Projects",
+      theme: {
+        light: "#2673ff",
+        dark: "#2673ff"
+      }
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -119,14 +130,23 @@ const Dashboard = () => {
               </div>
 
               <div className="mt-6 h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={projectStats}>
-                    <XAxis dataKey="name" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#2673ff" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <ChartContainer config={projectStatusConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={projectStats}>
+                      <XAxis dataKey="name" />
+                      <YAxis allowDecimals={false} />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                      />
+                      <Bar 
+                        dataKey="value" 
+                        name="projectStatus"
+                        fill="var(--color-projectStatus, #2673ff)" 
+                        radius={[4, 4, 0, 0]} 
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </CardContent>
           </Card>

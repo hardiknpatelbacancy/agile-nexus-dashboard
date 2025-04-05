@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Filter } from "lucide-react";
 import EmployeeCard from "@/components/employees/EmployeeCard";
-import { PieChart, Pie, ResponsiveContainer, Cell, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 // Mock data
 const employees = [
@@ -74,21 +74,80 @@ const employees = [
 ];
 
 const departmentData = [
-  { name: "Engineering", value: 18 },
-  { name: "Design", value: 8 },
-  { name: "Operations", value: 6 },
-  { name: "Infrastructure", value: 5 },
-  { name: "Quality Assurance", value: 5 },
+  { name: "Engineering", value: 18, department: "engineering" },
+  { name: "Design", value: 8, department: "design" },
+  { name: "Operations", value: 6, department: "operations" },
+  { name: "Infrastructure", value: 5, department: "infrastructure" },
+  { name: "Quality Assurance", value: 5, department: "qa" },
 ];
 
 const utilizationData = [
-  { name: "Billable", value: 75 },
-  { name: "Non-Billable", value: 15 },
-  { name: "PTO/Training", value: 10 },
+  { name: "Billable", value: 75, category: "billable" },
+  { name: "Non-Billable", value: 15, category: "nonBillable" },
+  { name: "PTO/Training", value: 10, category: "pto" },
 ];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
-const UTILIZATION_COLORS = ["#00C49F", "#FFBB28", "#FF8042"];
+const departmentConfig = {
+  engineering: {
+    label: "Engineering",
+    theme: {
+      light: "#0088FE",
+      dark: "#0088FE"
+    }
+  },
+  design: {
+    label: "Design",
+    theme: {
+      light: "#00C49F",
+      dark: "#00C49F"
+    }
+  },
+  operations: {
+    label: "Operations",
+    theme: {
+      light: "#FFBB28",
+      dark: "#FFBB28"
+    }
+  },
+  infrastructure: {
+    label: "Infrastructure",
+    theme: {
+      light: "#FF8042",
+      dark: "#FF8042"
+    }
+  },
+  qa: {
+    label: "Quality Assurance",
+    theme: {
+      light: "#8884d8",
+      dark: "#8884d8"
+    }
+  }
+};
+
+const utilizationConfig = {
+  billable: {
+    label: "Billable",
+    theme: {
+      light: "#00C49F",
+      dark: "#00C49F"
+    }
+  },
+  nonBillable: {
+    label: "Non-Billable",
+    theme: {
+      light: "#FFBB28",
+      dark: "#FFBB28"
+    }
+  },
+  pto: {
+    label: "PTO/Training",
+    theme: {
+      light: "#FF8042",
+      dark: "#FF8042"
+    }
+  }
+};
 
 const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,7 +188,6 @@ const Employees = () => {
           </div>
         </div>
 
-        {/* Department & Utilization Analytics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -137,25 +195,36 @@ const Employees = () => {
             </CardHeader>
             <CardContent>
               <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={departmentData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {departmentData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value, name) => [`${value} employees`, name]} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <ChartContainer config={departmentConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={departmentData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        dataKey="value"
+                        nameKey="department"
+                      >
+                        {departmentData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={`var(--color-${entry.department})`} 
+                          />
+                        ))}
+                      </Pie>
+                      <ChartTooltip 
+                        content={
+                          <ChartTooltipContent 
+                            formatter={(value: number, name: string) => [`${value} employees`, name]}
+                            nameKey="department"
+                          />
+                        } 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </CardContent>
           </Card>
@@ -166,25 +235,36 @@ const Employees = () => {
             </CardHeader>
             <CardContent>
               <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={utilizationData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {utilizationData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={UTILIZATION_COLORS[index % UTILIZATION_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value, name) => [`${value}%`, name]} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <ChartContainer config={utilizationConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={utilizationData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        dataKey="value"
+                        nameKey="category"
+                      >
+                        {utilizationData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={`var(--color-${entry.category})`} 
+                          />
+                        ))}
+                      </Pie>
+                      <ChartTooltip 
+                        content={
+                          <ChartTooltipContent 
+                            formatter={(value: number) => [`${value}%`, undefined]}
+                            nameKey="category"
+                          />
+                        } 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </CardContent>
           </Card>

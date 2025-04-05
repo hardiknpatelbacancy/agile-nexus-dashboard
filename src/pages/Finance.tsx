@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 import RevenueChart from "@/components/finance/RevenueChart";
-import { PieChart, Pie, ResponsiveContainer, Cell, Legend } from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Cell, Legend, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 // Mock data
 const revenueData = [
@@ -73,6 +74,53 @@ const Finance = () => {
   const totalProfit = revenueData.reduce((sum, item) => sum + item.profit, 0);
   const profitMargin = (totalProfit / totalRevenue) * 100;
   
+  const clientChartConfig = {
+    client1: {
+      label: "TechCorp Inc.",
+      theme: {
+        light: "#0088FE",
+        dark: "#0088FE"
+      }
+    },
+    client2: {
+      label: "InnovateCo",
+      theme: {
+        light: "#00C49F",
+        dark: "#00C49F"
+      }
+    },
+    client3: {
+      label: "DataSecure",
+      theme: {
+        light: "#FFBB28",
+        dark: "#FFBB28"
+      }
+    },
+    client4: {
+      label: "ShopEasy",
+      theme: {
+        light: "#FF8042",
+        dark: "#FF8042"
+      }
+    },
+    client5: {
+      label: "Others",
+      theme: {
+        light: "#8884d8",
+        dark: "#8884d8"
+      }
+    }
+  };
+  
+  // Map data to include client keys for the chart config
+  const clientData = [
+    { name: "TechCorp Inc.", value: 120000, client: "client1" },
+    { name: "InnovateCo", value: 80000, client: "client2" },
+    { name: "DataSecure", value: 65000, client: "client3" },
+    { name: "ShopEasy", value: 95000, client: "client4" },
+    { name: "Others", value: 60000, client: "client5" },
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -155,25 +203,37 @@ const Finance = () => {
             </CardHeader>
             <CardContent>
               <div className="h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={revenueByClient}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {revenueByClient.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <ChartContainer config={clientChartConfig}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={clientData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        dataKey="value"
+                        nameKey="client"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {clientData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={`var(--color-${entry.client}, ${COLORS[index % COLORS.length]})`} 
+                          />
+                        ))}
+                      </Pie>
+                      <ChartTooltip 
+                        content={
+                          <ChartTooltipContent 
+                            formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]}
+                            nameKey="client"
+                          />
+                        } 
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
             </CardContent>
           </Card>
